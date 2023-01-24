@@ -1,5 +1,6 @@
 import sys, random, argparse
-import numpy as banane
+import cv2
+import numpy as np
 import math
 from PIL import Image
 
@@ -8,12 +9,11 @@ gscale2 = "@%#*+=-:.M"
 
 
 def averageL(img):
-
-    image = banane.array(img)
+    image = np.array(img)
 
     w, h = image.shape
 
-    return banane.average(image.reshape(w*h))
+    return np.average(image.reshape(w * h))
 
 
 def convertIntoAscii(imageFile, colonnes, echelle, niveauxSup):
