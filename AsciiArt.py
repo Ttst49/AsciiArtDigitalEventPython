@@ -1,8 +1,8 @@
-import sys, random, argparse
+import argparse
 import cv2
 import numpy as np
-import math
 from PIL import Image
+from PIL import ImageDraw
 
 gscale1 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\^`'."
 gscale2 = "@%#*+=-:.M"
@@ -16,12 +16,60 @@ def averageL(img):
     return np.average(image.reshape(w * h))
 
 
-def convertIntoAscii(imageFile, colonnes, echelle, niveauxSup):
+def picture():
+    global image
+
+    cam = cv2.VideoCapture(0)
+
+    cv2.namedWindow("test")
+
+    img_counter = 0
+
+    while True:
+        ret, frame = cam.read()
+        if not ret:
+            print("failed to grab frame")
+            break
+        cv2.imshow("Prendre une photo", frame)
+
+        k = cv2.waitKey(1)
+        if k % 256 == 27:
+            # ESC pressed
+            print("Escape hit, closing...")
+            break
+        elif k % 256 == 32:
+            # SPACE pressed
+            img_name = "images/opencv_frame_{}.png".format(img_counter)
+            image = "images/opencv_frame_{}.png".format(img_counter)
+            cv2.imwrite(img_name, frame)
+            print("{} written!".format(img_name))
+            img_counter += 1
+
+    cam.release()
+
+    cv2.destroyAllWindows()
+
+    return image
+
+
+def convertIntoAscii(imgFile, colonnes, echelle, niveauxSup):
     global gscale1, gscale2
 
-    image = Image.open(imageFile).convert('L')
+    imgFile = picture()
+
+    image = Image.open(imgFile).convert('L')
+
+    width, height = image.size
+
+    left = width / 2 - 300
+    bottom = height * 0.85
+    right = width / 2 + 300
+    top = height * 0.10
+
+    image = image.crop((left, top, right, bottom))
 
     W, H = image.size[0], image.size[1]
+    print(image.size[0], image.size[1])
 
     w = W / colonnes
     h = w / echelle
@@ -59,6 +107,13 @@ def convertIntoAscii(imageFile, colonnes, echelle, niveauxSup):
     return aimg
 
 
+def boucleImage(liste, file, banane=""):
+    for row in liste:
+        file.write(row + "\n")
+    print(banane)
+    return banane
+
+
 def main():
     descStr = "make ascii art"
     parser = argparse.ArgumentParser(description=descStr)
@@ -73,18 +128,43 @@ def main():
 
     imgFile = args.imgFile
 
-    echelle = 0.40
+    echelle = 0.50
     if args.echelle:
         echelle = float(args.echelle)
 
-    colonnes = 250
+    colonnes = 150
     if args.colonnes:
         colonnes = int(args.colonnes)
 
-    aimg = convertIntoAscii("images/image3.jpg", colonnes, echelle, args.niveauxSups)
+    aimg = convertIntoAscii(imgFile, colonnes, echelle, args.niveauxSups)
 
-    for row in aimg:
-        print(row + '\n')
+    # base = Image.open("images/baseAsciiVideNew.png")
+    # base = Image.open("images/testVide.svg")
+    base = open("ascii.txt", "w+")
+
+    base = boucleImage(aimg, base)
+
+    # base.save("images/baseAsciiNew.png")
+    # base.save("images/test.svg")
+
+    template = Image.open("images/template.jpg")
+
+    I1 = ImageDraw.Draw(template)
+
+    listAscii = ''
+
+    with open('ascii.txt') as base:
+        while True:
+            line = base.readline()
+            if not line:
+                break
+            listAscii += line.strip() + "\n"
+
+    I1.text((0, 0), listAscii, fill=(0, 0, 0))
+
+    print(listAscii)
+
+    template.show()
 
 
 main()
