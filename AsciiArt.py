@@ -3,6 +3,11 @@ import cv2
 import numpy as np
 from PIL import Image
 from PIL import ImageDraw
+from PIL import ImageFont
+import unicodedata
+
+
+font = ImageFont.truetype("Roboto.ttf", encoding="utf-8")
 
 gscale1 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\^`'."
 gscale2 = "@%#*+=-:.M"
@@ -61,12 +66,12 @@ def convertIntoAscii(imgFile, colonnes, echelle, niveauxSup):
 
     width, height = image.size
 
-    left = width / 2 - 300
-    bottom = height * 0.85
-    right = width / 2 + 300
-    top = height * 0.10
+    #left = width / 2 - 300
+    #bottom = height * 0.85
+    #right = width / 2 + 300
+    #top = height * 0.10
 
-    image = image.crop((left, top, right, bottom))
+    #image = image.crop((left, top, right, bottom))
 
     W, H = image.size[0], image.size[1]
     print(image.size[0], image.size[1])
@@ -160,11 +165,16 @@ def main():
                 break
             listAscii += line.strip() + "\n"
 
-    I1.text((0, 0), listAscii, fill=(0, 0, 0))
+            divAscii = f"<div>{listAscii}</div>"
 
-    print(listAscii)
 
-    template.show()
 
+    #I1.text((500, 50), listAscii, fill=(255, 255, 255), font=font)
+
+    #I1.text((500, 50), listAscii, fill=(255, 255, 255))
+
+
+
+    print(divAscii)
 
 main()
